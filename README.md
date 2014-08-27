@@ -12,6 +12,6 @@ $ npm install
 ### Run
 $ npm start
 
-* Home Page: [http://localhost:7000](http://localhost:7000)
+* Index Page: [http://localhost:7000](http://localhost:7000)
 * Login Page: [http://localhost:7000/login](http://localhost:7000/login)
 * Secured Page: [http://localhost:7000/home](http://localhost:7000/home)
