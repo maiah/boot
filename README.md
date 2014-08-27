@@ -1,4 +1,4 @@
 boot
 ====
 
-Node.js bootstrap application to provide essential jumpstart for network services type of applications.
+Node.js bootstrap application to provide essential jumpstart for secured network services type of applications.
