@@ -1,0 +1,31 @@
+{
+  "name": "boot",
+  "version": "0.0.1",
+  "description": "Bootstrap application for your secured network services applications",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run browserify-watchify & npm run start-server",
+    "browserify-watchify": "npm run browserify-js && npm run watchify-js",
+    "browserify-js": "browserify public/js/boot.js -o public/js/build/build.js",
+    "watchify-js": "watchify public/js/boot.js -o public/js/build/build.js",
+    "start-server": "nodemon app --ignore public"
+  },
+  "keywords": [
+    "buy"
+  ],
+  "repository": "maiah/boot",
+  "author": "Maiah Macariola",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.6.5",
+    "ejs": "^1.0.0",
+    "express": "^4.8.5",
+    "express-session": "^1.7.6"
+  },
+  "devDependencies": {
+    "browserify": "^5.10.1",
+    "nodemon": "^1.2.1",
+    "watchify": "^1.0.2"
+  }
+}
