@@ -9,7 +9,7 @@
     "browserify-watchify": "npm run browserify-js && npm run watchify-js",
     "browserify-js": "browserify public/js/boot.js -o public/js/build/build.js",
     "watchify-js": "watchify public/js/boot.js -o public/js/build/build.js",
-    "start-server": "nodemon app --ignore public"
+    "start-server": "nodemon --harmony-generators app --ignore public"
   },
   "keywords": [
     "buy"
@@ -19,13 +19,16 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.6.5",
-    "ejs": "^1.0.0",
-    "express": "^4.8.5",
-    "express-session": "^1.7.6"
+    "co-body": "^1.0.0",
+    "co-views": "^0.2.0",
+    "koa": "^0.10.0",
+    "koa-session": "^2.0.0",
+    "koa-static": "^1.4.6",
+    "swig": "^1.4.2"
   },
   "devDependencies": {
     "browserify": "^5.10.1",
-    "nodemon": "^1.2.1",
-    "watchify": "^1.0.2"
+    "watchify": "^1.0.2",
+    "nodemon": "^1.2.1"
   }
 }

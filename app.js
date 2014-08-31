@@ -1,7 +1,9 @@
-var express = require('express'),
-    app = express(),
-    bodyParser = require('body-parser'),
-    session = require('express-session');
+var koa = require('koa');
+var app = koa();
+var views = require('co-views');
+var serve = require('koa-static');
+var parse = require('co-body');
+var session = require('koa-session');
 
 // Mock users db.
 var users = {
@@ -9,23 +11,9 @@ var users = {
     'maiah' : 'john'
 };
 
-// Config.
-app.set('view engine', 'ejs');
-app.set('views', __dirname + '/views');
-
-// Middleware setup.
-app.use(express.static(__dirname + '/public'));
-app.use(bodyParser.urlencoded({ 'extended' : false }));
-app.use(session({
-    'resave' : false,
-    'saveUninitialized' : false,
-    'secret' : 'somesecretmouseandelephant'
-}));
-app.use(function (req, res, next) {
-    res.locals.errorMsg = '';
-    next();
-});
-
+/**
+ * Utils.
+ */
 function genToken() {
     return new Date().toString();
 }
@@ -38,40 +26,77 @@ function authenticate(req, res, fn) {
     }
 }
 
-app.route('/login')
-    .get(function (req, res) {
-        if (req.session.token) {
-            res.redirect('/home');
-        } else {
-            res.render('login');
-        }
-    })
-    .post(function (req, res) {
-        var username = req.body.username
-
-        if (users[username] && users[username] === req.body.password) {
-            req.session.token = genToken();
-            res.redirect('/home');
-
-        } else {
-            delete req.session.token;
-
-            res.locals.errorMsg = 'Wrong username or password!';
-            res.render('login');
-        }
-    });
-
-app.get('/logout', function (req, res) {
-    req.session.destroy(function () {
-        res.redirect('/login');
-    });
+var render = views(__dirname + '/views', {
+  map: { 'html' : 'swig' }
 });
 
-// Secure page.
-app.get('/home', function (req, res) {
-    authenticate(req, res, function () {
-        res.send('This is a secure page.<br><a href="/logout">logout</a>');
-    });
+/**
+ * Middleware setup.
+ */
+app.use(serve(__dirname + '/public'));
+
+app.keys = ['somesecretmouseandelephant'];
+app.use(session());
+
+/**
+ * Routes.
+ */
+app.use(function* (next) {
+    if (this.method === 'GET' && this.path === '/login') {
+        if (this.session.user) {
+            this.redirect('/home');
+        } else {
+            this.body = yield render('login', { 'msg' : this.session.msg });
+        }
+    }
+
+    yield* next;
+});
+
+app.use(function* (next) {
+    if (this.method === 'POST' && this.path === '/login') {
+        var login = yield parse(this);
+
+        if (users[login.username] && users[login.username] === login.password) {
+            delete this.session.msg;
+
+            // Initialize session user and his/her token.
+            this.session.user = {
+                'username' : login.username,
+                'token' : genToken()
+            }
+
+            this.redirect('/home');
+        } else {
+            this.session.msg = 'Error username or password';
+            this.redirect('/login');
+        }
+    }
+
+    yield* next;
+});
+
+app.use(function* (next) {
+    if (this.path === '/logout') {
+        // Clear the session.
+        delete this.session.user;
+        this.redirect('/login');
+    }
+
+    yield* next;
+});
+
+app.use(function* (next) {
+    if (this.path === '/home') {
+        if (this.session.user) {
+            this.type = 'text/html';
+            this.body = 'hello ' + this.session.user.username + '. you may <a href="/logout">logout</a>.';
+        } else {
+            this.redirect('/login');
+        }
+    }
+
+    yield* next;
 });
 
 app.listen(7000);

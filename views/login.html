@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block title %}Boot Login{% endblock %}
+
+{% block content %}
+    {{ msg }}
+    <form action="/login" method="POST">
+        <input name="username" type="text" placeholder="username"><br>
+        <input name="password" type="password" placeholder="password"><br>
+        <input type="submit" value="Login">
+    </form>
+{% endblock %}
