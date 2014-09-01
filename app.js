@@ -18,11 +18,11 @@ function genToken() {
     return new Date().toString();
 }
 
-function authenticate(req, res, fn) {
-    if (req.session.token) {
-        fn();
+function authenticate(user) {
+    if (user && user.token) {
+        return true;
     } else {
-        res.redirect('/login');
+        return false;
     }
 }
 
@@ -67,6 +67,7 @@ app.use(function* (next) {
             }
 
             this.redirect('/home');
+
         } else {
             this.session.msg = 'Error username or password';
             this.redirect('/login');
@@ -88,11 +89,47 @@ app.use(function* (next) {
 
 app.use(function* (next) {
     if (this.path === '/home') {
-        if (this.session.user) {
+        if (authenticate(this.session.user)) {
             this.type = 'text/html';
             this.body = 'hello ' + this.session.user.username + '. you may <a href="/logout">logout</a>.';
+
         } else {
             this.redirect('/login');
+        }
+    }
+
+    yield* next;
+});
+
+/**
+ * API definitions.
+ */
+app.use(function* (next) {
+    if (this.path === '/api/sample1') {
+        this.body = {
+            'name' : 'sample1',
+            'type' : 'unsecured'
+        };
+    }
+
+    yield* next;
+});
+
+app.use(function* (next) {
+    if (this.path === '/api/sample2') {
+        if (authenticate(this.session.user)) {
+            this.body = {
+                'name' : 'sample2',
+                'type' : 'secured'
+            };
+
+        } else {
+            this.status = 401;
+
+            this.body = {
+                'statusCode' : 401,
+                'status' : 'unauthorized'
+            };
         }
     }
 
